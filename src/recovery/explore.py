@@ -1,14 +1,12 @@
 # explore.py
 import requests
 
-def explore_data(url: str, offset: int = 0, limit: int = 100, refine: dict | None = None) -> tuple[list, int]:
-    if refine is None:
-        refine = {}
+def explore_data(url: str, offset: int = 0, limit: int = 100, refine: str = "") -> tuple[list, int]:
     params={
         "offset":offset,
         "limit": limit,
+        "refine": refine
         }
-    params = params | {f"refine.{key}": value for key, value in refine.items()}
 
     r = requests.get(
         url,
@@ -16,14 +14,13 @@ def explore_data(url: str, offset: int = 0, limit: int = 100, refine: dict | Non
         timeout=10
         )
 
-    print(r.url)
     r.raise_for_status()
     response = r.json()
     results = response["results"]
     total_count = response["total_count"]
     return results, total_count
 
-def paginate(url: str, limit: int = 100, refine: dict | None = None) -> list:
+def paginate(url: str, limit: int = 100, refine: str = "") -> list:
     offset = 0
     result_list = []
     results, total_count = explore_data(url, offset, limit, refine)
@@ -33,4 +30,11 @@ def paginate(url: str, limit: int = 100, refine: dict | None = None) -> list:
         results, total_count = explore_data(url, offset, limit, refine)
         result_list.extend(results)
         offset += limit
+    return result_list
+
+def fetch_by_year(url: str, year: int) -> list:
+    result_list = []
+    for month in range(1, 13):
+        refine = f"date_heure:\"{year}/{month:02d}\""
+        result_list += paginate(url, refine=refine)
     return result_list
