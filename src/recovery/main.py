@@ -7,13 +7,14 @@ from src.recovery.explore import fetch_by_year
 
 def main(year: int, url: str):
     path = Path("src") / "raw_storage" / f"{year}.json"
+    excluded_columns = {"perimetre", "nature", "date_heure", "prevision_j1", "prevision_j"}
     if path.exists():
         with open(path, 'r') as f:
             data = json.load(f)
     else:
         data = fetch_by_year(url, year)
         write_raw(data, path)
-    df = clean_data(data)
+    df = clean_data(data, excluded_columns)
     return df
 
 if __name__== "__main__":
