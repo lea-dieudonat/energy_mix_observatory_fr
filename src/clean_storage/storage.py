@@ -14,14 +14,14 @@ def write_sql(df: DataFrame, path: Path):
     replace_str = ", ".join(replace_columns)
 
     conn = sqlite3.connect(path)
-    conn.execute(f"CREATE TABLE IF NOT EXISTS mesures (date_heure TEXT unique, {measure_str})")
+    conn.execute(f"CREATE TABLE IF NOT EXISTS measures (date_heure TEXT unique, {measure_str})")
 
     ordered_columns = ["date_heure", *measure_columns]
     df_reordered = df_timestamp[ordered_columns]
 
     for row in df_reordered.itertuples(index=False):
         try:
-            conn.execute(f"INSERT INTO mesures VALUES ({replace_str})", tuple(row))
+            conn.execute(f"INSERT INTO measures VALUES ({replace_str})", tuple(row))
         except sqlite3.IntegrityError:
             ignored_rows.append(row.date_heure)
     conn.commit()
